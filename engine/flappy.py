@@ -3,7 +3,7 @@ import random
 import sys
 import pygame
 from pygame.locals import *
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 
 FPS = 30
 SCREENWIDTH  = 288
@@ -166,14 +166,6 @@ class FlappyBird:
                 if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                     pygame.quit()
                     sys.exit()
-                if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                    # make first flap sound and return values for mainGame
-                    SOUNDS['wing'].play()
-                    return {
-                        'self.playery': self.playery + playerShmVals['val'],
-                        'basex': basex,
-                        'playerIndexGen': playerIndexGen,
-                    }
 
             # adjust self.playery, playerIndex, basex
             if (loopIter + 1) % 5 == 0:
@@ -189,8 +181,16 @@ class FlappyBird:
             SCREEN.blit(IMAGES['message'], (messagex, messagey))
             SCREEN.blit(IMAGES['base'], (basex, BASEY))
 
+
             pygame.display.update()
             FPSCLOCK.tick(FPS)
+            
+            SOUNDS['wing'].play()
+            return {
+                'self.playery': self.playery + playerShmVals['val'],
+                'basex': basex,
+                'playerIndexGen': playerIndexGen,
+            }
 
 
     def mainGame(self, movementInfo):
@@ -363,9 +363,6 @@ class FlappyBird:
                 if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                     pygame.quit()
                     sys.exit()
-                if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                    if self.playery + playerHeight >= BASEY - 1:
-                        return
 
             # player y shift
             if self.playery + playerHeight < BASEY - 1:
@@ -399,6 +396,8 @@ class FlappyBird:
 
             FPSCLOCK.tick(FPS)
             pygame.display.update()
+
+            return
 
 
     def _playerShm(self, playerShm):
@@ -500,3 +499,4 @@ class FlappyBird:
             for y in xrange(image.get_height()):
                 mask[x].append(bool(image.get_at((x,y))[3]))
         return mask
+
